@@ -1,4 +1,16 @@
 import React from "react";
+import { notFound } from "next/navigation";
+
+//default value for dynamicParams is true
+export const dynamicParams = true; //if this is set to false, next js will server up a default 404 page, when a request for an id comes, which doesnt not exist in the prerendered pages for ids
+
+export async function generateStaticParams() {
+  const res = await fetch(`http://localhost:4000/tickets`);
+
+  const tickets = await res.json();
+
+  return tickets.map((ticket) => ({ id: ticket.id }));
+}
 
 async function getTicket(id) {
   const res = await fetch(`http://localhost:4000/tickets/${id}`, {
@@ -6,6 +18,10 @@ async function getTicket(id) {
       revalidate: 60,
     },
   });
+
+  if (!res.ok) {
+    notFound();
+  }
 
   return res.json();
 }
